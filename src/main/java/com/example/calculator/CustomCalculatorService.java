@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class CustomCalculatorService implements CalculatorServiceInterface{
     @Override
     public Double add(Double x, Double y) {
@@ -31,55 +32,35 @@ public class CustomCalculatorService implements CalculatorServiceInterface{
         List<String> expList = new ArrayList<>();
         List<String> operatorList = new ArrayList<>();
         List<String> valueList = new ArrayList<>();
-        int counter = 0, counterOp = 0;
-        String value, next_val;
-        Double num1 = 0.0, num2 = 0.0, total = 0.0;
-
+        int generalCounter = 0, operatorCounter = 0;
+        Double total = 0.0;
         StringBuilder strBuilder= new StringBuilder();
 
-        while (counter < expression.length()) {
-            value = expression.substring(counter, counter + 1);
-            expList.add(value);
-            counter++;
-        }
+        convertToList(expression, expList, generalCounter);
 
-        counter = 0;
-        while(counter < expList.size()){
-            value = expList.get(counter);
+        generalCounter = 0;
+        separateList(expList, operatorList, valueList, generalCounter, strBuilder);
 
-            if(value.equals("+") || value.equals("-") || value.equals("*") || value.equals("/")){
-                operatorList.add(value);
-                counter++;
-            } else{
-                strBuilder.append(value);
-                counter++;
-                if(counter < expList.size()) {
-                    next_val = expList.get(counter);
-                    while (!next_val.equals("+") && !next_val.equals("-") && !next_val.equals("*") && !next_val.equals("/")) {
-                        strBuilder.append(next_val);
-                        if (counter < expList.size()) {
-                            counter++;
-                            next_val = expList.get(counter);
-                        }
-                    }
-                }
-                valueList.add(String.valueOf(strBuilder));
-                strBuilder.setLength(0);
-            }
-        }
+        generalCounter = 0;
+        total = evaluateExpression(operatorList, valueList, generalCounter, operatorCounter, total);
 
-        counter = 0;
-        while(counter < valueList.size()){
+        return total;
+    }
 
-            if(counter == 0) {
-                num1 = Double.valueOf(valueList.get(counter));
-                num2 = Double.valueOf(valueList.get(counter + 1));
+    private Double evaluateExpression(List<String> operatorList, List<String> valueList, int generalCounter, int operatorCounter, Double total) {
+        Double num1;
+        Double num2;
+        while(generalCounter < valueList.size()){
+
+            if(generalCounter == 0) {
+                num1 = Double.valueOf(valueList.get(generalCounter));
+                num2 = Double.valueOf(valueList.get(generalCounter + 1));
             } else{
                 num1 = total;
-                num2 = Double.valueOf(valueList.get(counter));
+                num2 = Double.valueOf(valueList.get(generalCounter));
             }
 
-            switch (operatorList.get(counterOp)) {
+            switch (operatorList.get(operatorCounter)) {
                 case "+":
                     total = add(num1, num2);
                     break;
@@ -94,15 +75,51 @@ public class CustomCalculatorService implements CalculatorServiceInterface{
                     break;
             }
 
-            counterOp++;
-            if(counter==0){
-                counter = counter + 2;
+            operatorCounter++;
+            if(generalCounter==0){
+                generalCounter = generalCounter + 2;
             } else{
-                counter++;
+                generalCounter++;
             }
         }
-
         return total;
+    }
+
+    private void separateList(List<String> expList, List<String> operatorList, List<String> valueList, int generalCounter, StringBuilder strBuilder) {
+        String listValue1;
+        String listValue2;
+        while(generalCounter < expList.size()){
+            listValue1 = expList.get(generalCounter);
+
+            if(listValue1.equals("+") || listValue1.equals("-") || listValue1.equals("*") || listValue1.equals("/")){
+                operatorList.add(listValue1);
+                generalCounter++;
+            } else{
+                strBuilder.append(listValue1);
+                generalCounter++;
+                if(generalCounter < expList.size()) {
+                    listValue2 = expList.get(generalCounter);
+                    while (!listValue2.equals("+") && !listValue2.equals("-") && !listValue2.equals("*") && !listValue2.equals("/")) {
+                        strBuilder.append(listValue2);
+                        if (generalCounter < expList.size()) {
+                            generalCounter++;
+                            listValue2 = expList.get(generalCounter);
+                        }
+                    }
+                }
+                valueList.add(String.valueOf(strBuilder));
+                strBuilder.setLength(0);
+            }
+        }
+    }
+
+    private void convertToList(String expression, List<String> expList, int counter) {
+        String value;
+        while (counter < expression.length()) {
+            value = expression.substring(counter, counter + 1);
+            expList.add(value);
+            counter++;
+        }
     }
 
 }

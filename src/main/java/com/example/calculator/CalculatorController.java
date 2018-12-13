@@ -2,36 +2,57 @@ package com.example.calculator;
 
 import org.springframework.web.bind.annotation.*;
 
+
 // presentation
 @RestController
 @RequestMapping("/api")
+public class CalculatorController{
 
-public class CalculatorController {
-
+    private String response;
     private CalculatorServiceInterface service;
-
     public CalculatorController(CalculatorServiceInterface service) {
         this.service = service;
     }
 
+    private boolean checkParameters(String x, String y){
+        try {
+            Double.parseDouble(x);
+            Double.parseDouble(y);
+            return true;
+        }catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     @GetMapping("/add")
-    public Double add(@RequestParam Double x, @RequestParam Double y) {
-        return service.add(x, y);
+    public String add(@RequestParam String x, @RequestParam String y){
+        response = (checkParameters(x, y)) ? String.valueOf(service.add(Double.valueOf(x),Double.valueOf(y))):"Please enter numerical values for both x and y.";
+        return response;
     }
 
     @GetMapping("/subtract")
-    public Double subtract(@RequestParam Double x, @RequestParam Double y) {
-        return service.subtract(x, y);
+    public String subtract(@RequestParam String x, @RequestParam String y){
+        response = (checkParameters(x, y)) ? String.valueOf(service.subtract(Double.valueOf(x),Double.valueOf(y))):"Please enter numerical values for both x and y.";
+        return response;
     }
 
     @GetMapping("/multiply")
-    public Double multiply(@RequestParam Double x, @RequestParam Double y) {
-        return service.multiply(x, y);
+    public String multiply(@RequestParam String x, @RequestParam String y){
+        response = (checkParameters(x, y)) ? String.valueOf(service.multiply(Double.valueOf(x),Double.valueOf(y))):"Please enter numerical values for both x and y.";
+        return response;
     }
 
     @GetMapping("/divide")
-    public Double divide(@RequestParam Double x, @RequestParam Double y) {
-        return service.divide(x, y);
+    public String divide(@RequestParam String x, @RequestParam String y){
+        response = (checkParameters(x, y)) ? "true":"Please enter numerical values for both x and y.";
+
+        if(!y.equals("0") && response.equals("true")){
+            response = String.valueOf(service.divide(Double.valueOf(x),Double.valueOf(y)));
+        } else if(y.equals("0")){
+            response = "Division by zero is not allowed.";
+        }
+
+        return response;
     }
 
     @GetMapping("/expression")
